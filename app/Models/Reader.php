@@ -17,6 +17,26 @@ class Reader extends Model
         'id_card',
     ];
 
+    protected $with = ['books'];
+
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when(
+            $filters['search'] ?? false,
+            fn ($query, $search) =>
+            $query->where(
+                fn ($query) =>
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('surname', 'like', '%' . $search . '%')
+                    ->orWhere('id_card', 'like', '%' . $search . '%')
+            )
+        );
+    }
+
+    public function getFullnameAttribute(){
+        return $this->name . ' ' . $this->surname;
+    }
+
     public function books(): BelongsToMany
     {
         return $this->belongsToMany(Book::class)->withPivot('borrow_date', 'return_date');

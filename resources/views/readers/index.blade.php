@@ -3,14 +3,14 @@
         <div class="sm:flex sm:items-center sm:justify-between">
             <div>
                 <div class="flex items-center gap-x-3">
-                    <h2 class="text-lg font-medium text-gray-800">Zoznam kníh</h2>
+                    <h2 class="text-lg font-medium text-gray-800">Zoznam čitateľov</h2>
                 </div>
 
                 <p class="mt-1 text-sm text-gray-500">Text</p>
             </div>
 
             <div class="flex items-center mt-4 gap-x-3">
-                <a href="{{ route('books.create') }}"
+                <a href="{{ route('readers.create') }}"
                     class="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-5 h-5">
@@ -18,37 +18,33 @@
                             d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
 
-                    <span>Pridaj knihu</span>
+                    <span>Pridaj čitateľa</span>
                 </a>
             </div>
         </div>
 
         <div class="mt-6 md:flex md:items-center md:justify-between">
             <div class="inline-flex overflow-hidden bg-white border divide-x rounded-lg rtl:flex-row-reverse">
-                <a href="{{ route('books.index') }}?{{ http_build_query(request()->except('borrowed', 'page')) }}"
+                <button
                     class="px-5 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 sm:text-sm
                     {{ is_null(request()->input('borrowed')) ? 'bg-gray-100' : 'hover:bg-gray-100' }}">
-                    Všetky knihy
-                </a>
+                    Filter
+                </button>
 
-                <a href="{{ route('books.index') }}?borrowed=no&{{ http_build_query(request()->except('borrowed', 'page')) }}"
+                <button
                     class="px-5 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 sm:text-sm
                     {{ request()->filled('borrowed') && request()->input('borrowed') === 'no' ? 'bg-gray-100' : 'hover:bg-gray-100' }}">
-                    Dostupné
-                </a>
+                    Filter
+                </button>
 
-                <a href="{{ route('books.index') }}?borrowed=yes&{{ http_build_query(request()->except('borrowed', 'page')) }}"
+                <button
                     class="px-5 py-2 text-xs font-medium text-gray-600 transition-colors duration-200 sm:text-sm
-                    {{ request()->filled('borrowed') && request()->input('borrowed') === 'yes' ? 'bg-gray-100' : 'hover:bg-gray-100' }}">
-                    Požičané
-                </a>
+                    {{ request()->filled('borrowed') && request()->input('borrowed') === 'no' ? 'bg-gray-100' : 'hover:bg-gray-100' }}">
+                    Filter
+                </button>
             </div>
 
-            <form method="GET" action="{{ route('books.index') }}">
-
-                @if (request()->filled('borrowed'))
-                    <input type="hidden" name="borrowed" value="{{ request('borrowed') }}">
-                @endif
+            <form method="GET" action="{{ route('readers.index') }}">
 
                 <div class="relative flex items-center mt-4 md:mt-0">
                     <span class="absolute">
@@ -59,7 +55,7 @@
                         </svg>
                     </span>
 
-                    <input type="text" name="search" placeholder="Hladať knihu, autora, isbn.."
+                    <input type="text" name="search" placeholder="Hladať čitateľa, občiansky.."
                         value="{{ request('search') }}"
                         class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40">
                 </div>
@@ -79,7 +75,7 @@
                                     <th scope="col"
                                         class="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500">
                                         <button class="flex items-center gap-x-3 focus:outline-none">
-                                            <span>Kniha</span>
+                                            <span>Meno</span>
 
                                             <svg class="h-3" viewBox="0 0 10 11" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
@@ -98,17 +94,17 @@
 
                                     <th scope="col"
                                         class="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500">
-                                        Stav
+                                        Dátum narodenia
                                     </th>
 
                                     <th scope="col"
                                         class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500">
-                                        ISBN
+                                        Číslo občianskeho
                                     </th>
 
                                     <th scope="col"
                                         class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500">
-                                        Čitateľ</th>
+                                        Registrácia</th>
 
                                     <th scope="col" class="relative py-3.5 px-4">
                                         <span class="sr-only">Edit</span>
@@ -117,55 +113,30 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
 
-                                @forelse ($books as $book)
+                                @forelse ($readers as $reader)
                                     <tr>
                                         <td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
                                             <div>
-                                                <h2 class="font-medium text-gray-800 ">{{ $book->title }}</h2>
-                                                <p class="text-sm font-normal text-gray-600">{{ $book->author }}</p>
+                                                <h2 class="font-medium text-gray-800 ">{{ $reader->fullname }}</h2>
                                             </div>
                                         </td>
                                         <td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
-                                            @if ($book->borrowed)
-                                                <div
-                                                    class="inline px-3 py-1 text-sm font-normal text-gray-500 bg-gray-100 rounded-full gap-x-2">
-                                                    Požičaná
-                                                </div>
-                                            @else
-                                                <div
-                                                    class="inline px-3 py-1 text-sm font-normal rounded-full text-emerald-500 gap-x-2 bg-emerald-100/60">
-                                                    Dostupná
-                                                </div>
-                                            @endif
+                                            <h4 class="text-gray-700">{{ date('d.m.Y', strtotime($reader->birthday)) }}</h4>
                                         </td>
                                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                                             <div>
-                                                <h4 class="text-gray-700">{{ $book->isbn }}</h4>
+                                                <h4 class="text-gray-700">{{ $reader->id_card }}</h4>
                                             </div>
                                         </td>
                                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                                             <div class="flex items-center">
-                                                @if ($book->readers->last())
-                                                    <div>
-                                                        <p class="font-normal text-gray-700">
-                                                            {{ $book->readers->last()->name }}
-                                                        </p>
-                                                        <p class="text-xs font-normal text-gray-600">
-                                                           od {{ date('d.m.Y', strtotime($book->readers->last()->pivot->borrow_date)) }}
-                                                        </p>
-                                                    </div>
-                                                @else
-                                                    <p class="text-gray-700">
-                                                        Vypožičať
-                                                    </p>
-                                                @endif
-
+                                                {{ date('d.m.Y', strtotime($reader->created_at)) }}
                                             </div>
                                         </td>
 
                                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                                             <div class="flex items-center space-x-2">
-                                                <a href="{{ route('books.edit', $book) }}"
+                                                <a href="{{ route('readers.edit', $reader) }}"
                                                     class="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg hover:bg-gray-100">
                                                     <svg class="w-6 h-6 text-gray-800" aria-hidden="true"
                                                         xmlns="http://www.w3.org/2000/svg" fill="currentColor"
@@ -179,7 +150,7 @@
                                                     </svg>
                                                 </a>
 
-                                                <form method="POST" action="{{ route('books.destroy', $book) }}">
+                                                <form method="POST" action="{{ route('readers.destroy', $reader) }}">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button onclick="return confirm('Naozaj checete vymazat?')"
@@ -211,7 +182,7 @@
         </div>
 
         <div class="mt-6 mx-2">
-            {{ $books->links() }}
+            {{ $readers->links() }}
         </div>
     </section>
 </x-layout>
