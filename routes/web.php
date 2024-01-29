@@ -19,5 +19,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resource('books', BookController::class);
-Route::resource('readers', ReaderController::class);
+Route::resource('books', BookController::class)->except('show');
+
+Route::get('/books/{book}/assign', [BookController::class, 'showAssignPage'])->name('books.showAssign');
+Route::post('/books/{book}/assign', [BookController::class, 'assignBookToReader'])->name('books.assign');
+Route::post('/books/{book}/return', [BookController::class, 'returnBook'])->name('books.return');
+
+Route::resource('readers', ReaderController::class)->except('show');

@@ -170,7 +170,7 @@
                                 @empty
                                     <tr>
                                         <td>
-                                            Nenašli sa žiadne knihy.
+                                            Nenašli sa žiadny čitatelia.
                                         </td>
                                     </tr>
                                 @endforelse

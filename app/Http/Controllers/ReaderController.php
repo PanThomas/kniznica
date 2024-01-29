@@ -11,10 +11,10 @@ class ReaderController extends Controller
     public function index()
     {
         $readers = Reader::query()
-        ->filter(request(['search']))
-        ->orderBy('surname')
-        ->paginate(10)
-        ->withQueryString();
+            ->filter(request(['search']))
+            ->orderBy('surname')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('readers.index', compact('readers'));
     }
@@ -26,9 +26,10 @@ class ReaderController extends Controller
 
     public function store()
     {
-        Reader::create($this->validateBook());
+        $validatedData = $this->validateReader();
+        Reader::create($validatedData);
 
-        return redirect(route('readers.index'));
+        return redirect(route('readers.index'))->with('success', 'Čitateľ pridaný!');
     }
 
     public function edit(Reader $reader)
@@ -51,14 +52,14 @@ class ReaderController extends Controller
         return back()->with('success', 'Čitateľ odstránený!');
     }
 
-    protected function validateBook(?Reader $reader = null): array
+    protected function validateReader(?Reader $reader = null): array
     {
         $reader ??= new Reader();
 
         return request()->validate([
             'name' => 'required',
             'surname' => 'required',
-            'birthday' => 'required|date',
+            'birthday' => ['required', 'date'],
             'id_card' => ['required', Rule::unique('readers', 'id_card')->ignore($reader)],
         ]);
     }

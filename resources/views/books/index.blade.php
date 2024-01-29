@@ -145,69 +145,88 @@
                                         </td>
                                         <td class="px-4 py-4 text-sm whitespace-nowrap">
                                             <div class="flex items-center">
-                                                @if ($book->readers->last())
-                                                    <div>
-                                                        <p class="font-normal text-gray-700">
-                                                            {{ $book->readers->last()->name }}
-                                                        </p>
-                                                        <p class="text-xs font-normal text-gray-600">
-                                                           od {{ date('d.m.Y', strtotime($book->readers->last()->pivot->borrow_date)) }}
-                                                        </p>
+                                                @if ($book->borrowed)
+                                                    <div class="flex items-center justify-between">
+                                                        <div class="flex flex-col items-center">
+                                                            <p class="font-normal text-gray-700">
+                                                                {{ $book->readers->last()->fullname }}
+                                                            </p>
+                                                            <p class="text-xs font-normal text-gray-600">
+                                                                od
+                                                                {{ date('d.m.Y', strtotime($book->readers->last()->pivot->borrow_date)) }}
+                                                            </p>
+                                                        </div>
+
+                                                        <div class="text-gray-700">
+                                                            <form method="POST"
+                                                                action="{{ route('books.return', ['book' => $book->id]) }}">
+                                                                @csrf
+                                                                <input type="hidden" name="reader_id" value="{{ $book->readers->last()->id }}">
+                                                                <button type="submit"
+                                                                    onclick="return confirm('Potvrdit vratenie knihy')"
+                                                                    class="px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-green-500 rounded-lg sm:ml-4 hover:bg-green-600">
+                                                                    Vrátiť
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </div>
-                                                @else
-                                                    <p class="text-gray-700">
-                                                        Vypožičať
-                                                    </p>
-                                                @endif
 
                                             </div>
-                                        </td>
-
-                                        <td class="px-4 py-4 text-sm whitespace-nowrap">
-                                            <div class="flex items-center space-x-2">
-                                                <a href="{{ route('books.edit', $book) }}"
-                                                    class="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg hover:bg-gray-100">
-                                                    <svg class="w-6 h-6 text-gray-800" aria-hidden="true"
-                                                        xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path fill-rule="evenodd"
-                                                            d="M11.3 6.2H5a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h11c1.1 0 2-1 2-2.1V11l-4 4.2c-.3.3-.7.6-1.2.7l-2.7.6c-1.7.3-3.3-1.3-3-3.1l.6-2.9c.1-.5.4-1 .7-1.3l3-3.1Z"
-                                                            clip-rule="evenodd" />
-                                                        <path fill-rule="evenodd"
-                                                            d="M19.8 4.3a2.1 2.1 0 0 0-1-1.1 2 2 0 0 0-2.2.4l-.6.6 2.9 3 .5-.6a2.1 2.1 0 0 0 .6-1.5c0-.2 0-.5-.2-.8Zm-2.4 4.4-2.8-3-4.8 5-.1.3-.7 3c0 .3.3.7.6.6l2.7-.6.3-.1 4.7-5Z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
+                                        @else
+                                            <p class="text-gray-700">
+                                                <a href="{{ route('books.showAssign', $book) }}"
+                                                    class="px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600">
+                                                    Vypožičať
                                                 </a>
+                                            </p>
+                                @endif
 
-                                                <form method="POST" action="{{ route('books.destroy', $book) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button onclick="return confirm('Naozaj checete vymazat?')"
-                                                        class="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg hover:bg-gray-100">
-                                                        <svg class="w-6 h-6 text-gray-800" aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path fill-rule="evenodd"
-                                                                d="M8.6 2.6A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4c0-.5.2-1 .6-1.4ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td>
-                                            Nenašli sa žiadne knihy.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
                     </div>
+                    </td>
+
+                    <td class="px-4 py-4 text-sm whitespace-nowrap">
+                        <div class="flex items-center space-x-2">
+                            <a href="{{ route('books.edit', $book) }}"
+                                class="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg hover:bg-gray-100">
+                                <svg class="w-6 h-6 text-gray-800" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd"
+                                        d="M11.3 6.2H5a2 2 0 0 0-2 2V19a2 2 0 0 0 2 2h11c1.1 0 2-1 2-2.1V11l-4 4.2c-.3.3-.7.6-1.2.7l-2.7.6c-1.7.3-3.3-1.3-3-3.1l.6-2.9c.1-.5.4-1 .7-1.3l3-3.1Z"
+                                        clip-rule="evenodd" />
+                                    <path fill-rule="evenodd"
+                                        d="M19.8 4.3a2.1 2.1 0 0 0-1-1.1 2 2 0 0 0-2.2.4l-.6.6 2.9 3 .5-.6a2.1 2.1 0 0 0 .6-1.5c0-.2 0-.5-.2-.8Zm-2.4 4.4-2.8-3-4.8 5-.1.3-.7 3c0 .3.3.7.6.6l2.7-.6.3-.1 4.7-5Z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </a>
+
+                            <form method="POST" action="{{ route('books.destroy', $book) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button onclick="return confirm('Naozaj chcete vymazat?')"
+                                    class="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg hover:bg-gray-100">
+                                    <svg class="w-6 h-6 text-gray-800" aria-hidden="true"
+                                        xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                        <path fill-rule="evenodd"
+                                            d="M8.6 2.6A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4c0-.5.2-1 .6-1.4ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td>
+                            Nenašli sa žiadne knihy.
+                        </td>
+                    </tr>
+                    @endforelse
+                    </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
         </div>
 
         <div class="mt-6 mx-2">

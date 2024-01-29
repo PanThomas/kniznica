@@ -17,8 +17,6 @@ class Reader extends Model
         'id_card',
     ];
 
-    protected $with = ['books'];
-
     public function scopeFilter($query, array $filters)
     {
         $query->when(
