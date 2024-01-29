@@ -52,7 +52,7 @@ class BookController extends Controller
         $readerId = $request->input('reader_id');
         $reader = Reader::findOrFail($readerId);
 
-        $pivotRecord = $reader->books()->where('book_id', $book->id)->first()->pivot;
+        $pivotRecord = $reader->books()->where('book_id', $book->id)->whereNull('return_date')->first()->pivot;
 
         $pivotRecord->update(['return_date' => now()]);
 
